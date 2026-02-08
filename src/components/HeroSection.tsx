@@ -1,7 +1,17 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { HiArrowRight } from "react-icons/hi";
+import { FiSearch } from "react-icons/fi";
+import { useState } from "react";
 
 export default function HeroSection() {
+  const [q, setQ] = useState("");
+  const navigate = useNavigate();
+
+  function goCompare() {
+    const query = q.trim();
+    navigate(query ? `/compare?q=${encodeURIComponent(query)}` : "/compare");
+  }
+
   return (
     <section className="relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-[#070A1A] via-[#060818] to-[#050815]" />
@@ -27,24 +37,43 @@ export default function HeroSection() {
             powered recommendations.
           </p>
 
-          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link
-              to="/compare"
-              className="inline-flex items-center justify-center gap-2 rounded-lg px-6 py-3 text-sm font-semibold text-white
-                         bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500
-                         transition shadow-lg shadow-blue-500/15"
-            >
-              Start Comparing <HiArrowRight className="w-4 h-4" />
-            </Link>
+          {/* Search bar (new) */}
+          <div className="mx-auto mt-7 max-w-2xl">
+            <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 backdrop-blur px-3 py-3 shadow-lg shadow-blue-500/10">
+              <FiSearch className="h-5 w-5 text-white/50" />
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") goCompare();
+                }}
+                placeholder="Search a product to compare prices (e.g., iPhone 15 Pro, AirPods Pro)"
+                className="w-full bg-transparent text-sm md:text-base text-white placeholder:text-white/35 outline-none"
+              />
+              <button
+                type="button"
+                onClick={goCompare}
+                className="inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-xs md:text-sm font-semibold text-white
+                           bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500
+                           transition shadow-lg shadow-blue-500/15 whitespace-nowrap"
+              >
+                Search & Compare <HiArrowRight className="w-4 h-4" />
+              </button>
+            </div>
 
-            <Link
-              to="/how-it-works"
-              className="inline-flex items-center justify-center rounded-lg px-6 py-3 text-sm font-semibold
-                         text-white/85 border border-white/15 hover:bg-white/5 transition"
-            >
-              See How it Works
-            </Link>
+            {/* small link instead of big second button */}
+            <div className="mt-3">
+              <Link
+                to="/how-it-works"
+                className="text-xs md:text-sm text-white/55 hover:text-white/80 transition underline underline-offset-4"
+              >
+                How it works →
+              </Link>
+            </div>
           </div>
+
+          {/* Optional: keep a single CTA row (if you still want) */}
+          {/* If you want the old button too, we can add it back, but this is cleaner. */}
         </div>
 
         <div className="mt-12 h-px w-full bg-white/10" />
