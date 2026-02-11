@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Routes, Route } from "react-router-dom";
 import NavBar from "./components/NavBar";
 import Footer from "./components/Footer";
-
 import HomeSection from "./pages/HomeSection";
 import ReviewsPage from "./pages/Reviews";
 import HowItWorks from "./pages/HowItWorks";
@@ -11,6 +10,7 @@ import AllCategories from "./components/AllCategories";
 
 import SignInModal from "./components/SignInModal";
 import SignUpModal from "./components/SignUpModal";
+import CategoryPage from "./pages/CategoryPage";
 
 export default function App() {
   const [signInOpen, setSignInOpen] = useState(false);
@@ -26,8 +26,9 @@ export default function App() {
         <Route path="/how-it-works" element={<HowItWorks />} />
         <Route path="/features" element={<Featured />} />
         <Route path="/categories" element={<AllCategories />} />
-      </Routes>
+        <Route path="/categories/:category" element={<CategoryPage />} />
 
+      </Routes>
       <Footer />
 
       <SignInModal
