@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 type Offer = {
   store: "Amazon" | "eBay" | "AliExpress" | "Daraz";
@@ -7,8 +7,6 @@ type Offer = {
   rating: number;
   url: string;
 };
-
-
 
 type Product = {
   id: number;
@@ -24,9 +22,24 @@ function formatMoney(n: number) {
   return `$${n.toFixed(2)}`;
 }
 
-function getCheapest(offers: Offer[]) {
+function bestOffer(offers: Offer[]) {
   return [...offers].sort((a, b) => a.price - b.price)[0];
 }
+
+function bestDealScore(offers: Offer[]) {
+  // Phase-1 simple score: high rating + low price
+  const lowest = bestOffer(offers);
+  const bestRating = Math.max(...offers.map((o) => o.rating));
+  return bestRating * 10 - lowest.price / 50;
+}
+
+const TITLES: Record<string, string> = {
+  electronics: "Electronics",
+  fashion: "Fashion",
+  sports: "Sports",
+  beauty: "Beauty",
+};
+
 
 const PRODUCTS: Product[] = [
   // ===================== ELECTRONICS (30) =====================
@@ -1286,30 +1299,12 @@ const PRODUCTS: Product[] = [
 
 
 
-const TITLES: Record<string, string> = {
-  electronics: "Electronics",
-  fashion: "Fashion",
-  sports: "Sports",
-  beauty: "Beauty",
-};
-
-
-function bestOffer(offers: Offer[]) {
-  return [...offers].sort((a, b) => a.price - b.price)[0];
-}
-
-function bestDealScore(offers: Offer[]) {
-  // Phase-1 simple score: high rating + low price
-  const lowest = bestOffer(offers);
-  const bestRating = Math.max(...offers.map((o) => o.rating));
-  return bestRating * 10 - lowest.price / 50;
-}
-
 export default function CategoryPage() {
   const { category } = useParams();
-  const navigate = useNavigate();
 
-  const cat = (category as "electronics" | "fashion" | "sports") || "electronics";
+  // ✅ fixed: include beauty + safe fallback
+  const cat =
+    (category as "electronics" | "fashion" | "sports" | "beauty") || "electronics";
 
   const [q, setQ] = useState("");
   const [type, setType] = useState("All");
@@ -1334,7 +1329,11 @@ export default function CategoryPage() {
 
     const sorted = [...list].sort((a, b) => {
       if (sort === "price") return bestOffer(a.offers).price - bestOffer(b.offers).price;
-      if (sort === "rating") return Math.max(...b.offers.map(o => o.rating)) - Math.max(...a.offers.map(o => o.rating));
+      if (sort === "rating")
+        return (
+          Math.max(...b.offers.map((o) => o.rating)) -
+          Math.max(...a.offers.map((o) => o.rating))
+        );
       return bestDealScore(b.offers) - bestDealScore(a.offers);
     });
 
@@ -1354,7 +1353,10 @@ export default function CategoryPage() {
             </p>
           </div>
 
-          <Link to="/categories" className="text-sm text-white/60 hover:text-white underline underline-offset-4">
+          <Link
+            to="/categories"
+            className="text-sm text-white/60 hover:text-white underline underline-offset-4"
+          >
             ← Back
           </Link>
         </div>
@@ -1385,112 +1387,116 @@ export default function CategoryPage() {
             onChange={(e) => setSort(e.target.value as any)}
             className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none"
           >
-            <option value="best" className="bg-[#050815]">Best Deal</option>
-            <option value="price" className="bg-[#050815]">Lowest Price</option>
-            <option value="rating" className="bg-[#050815]">Top Rating</option>
+            <option value="best" className="bg-[#050815]">
+              Best Deal
+            </option>
+            <option value="price" className="bg-[#050815]">
+              Lowest Price
+            </option>
+            <option value="rating" className="bg-[#050815]">
+              Top Rating
+            </option>
           </select>
         </div>
 
         {/* Grid */}
         <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-  {items.map((p) => {
-    const sortedOffers = [...p.offers].sort((a, b) => a.price - b.price);
-    const cheapest = sortedOffers[0];
+          {items.map((p) => {
+            const sortedOffers = [...p.offers].sort((a, b) => a.price - b.price);
+            const cheapest = sortedOffers[0];
 
-    const onVisitStore = () => {
-      if (!cheapest?.url) return;
-      window.open(cheapest.url, "_blank", "noopener,noreferrer");
-    };
-
-    return (
-      <div
-        key={p.id}
-        className="w-full rounded-3xl border border-white/10 bg-white/5 backdrop-blur overflow-hidden shadow-lg shadow-blue-500/10"
-      >
-        {/* Image */}
-        <div className="p-4">
-          <div className="rounded-2xl bg-white/5 border border-white/10 p-3">
-            <img
-              src={p.image}
-              alt={p.title}
-              className="h-40 w-full object-contain"
-            />
-          </div>
-        </div>
-
-        {/* Title */}
-        <div className="px-5">
-          <h3 className="text-center text-lg font-bold text-white">
-            {p.title}
-          </h3>
-
-          {/* Rating + Lowest price */}
-          <div className="mt-3 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="text-yellow-400 text-sm">★★★★★</div>
-              <span className="text-sm text-white/70">{p.rating}</span>
-            </div>
-
-            <div className="text-right">
-              <p className="text-xs text-white/45">Lowest price</p>
-              <p className="text-sm font-semibold text-white">
-                {cheapest ? formatMoney(cheapest.price) : "--"}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Offers list (NO Visit button here) */}
-        <div className="mt-4 px-4 pb-2 space-y-2">
-          {sortedOffers.map((o) => {
-            const isCheapest = o.store === cheapest.store && o.price === cheapest.price;
+            const onVisitStore = () => {
+              if (!cheapest?.url) return;
+              window.open(cheapest.url, "_blank", "noopener,noreferrer");
+            };
 
             return (
               <div
-                key={`${p.id}-${o.store}`}
-                className="flex items-center justify-between rounded-xl border border-white/10 bg-[#050815]/30 px-3 py-2"
+                key={p.id}
+                className="w-full rounded-3xl border border-white/10 bg-white/5 backdrop-blur overflow-hidden shadow-lg shadow-blue-500/10"
               >
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-white/85">
-                    {o.store}
-                  </span>
-
-                  {isCheapest && (
-                    <span className="rounded-full bg-emerald-500/15 border border-emerald-500/25 px-2 py-0.5 text-[10px] font-semibold text-emerald-200">
-                      Cheapest
-                    </span>
-                  )}
+                {/* Image */}
+                <div className="p-4">
+                  <div className="rounded-2xl bg-white/5 border border-white/10 p-3">
+                    <img
+                      src={p.image}
+                      alt={p.title}
+                      className="h-40 w-full object-contain"
+                    />
+                  </div>
                 </div>
 
-                <span className="text-sm font-semibold text-white">
-                  {formatMoney(o.price)}
-                </span>
+                {/* Title */}
+                <div className="px-5">
+                  <h3 className="text-center text-lg font-bold text-white">{p.title}</h3>
+
+                  {/* Rating + Lowest price */}
+                  <div className="mt-3 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="text-yellow-400 text-sm">★★★★★</div>
+                      <span className="text-sm text-white/70">{p.rating}</span>
+                    </div>
+
+                    <div className="text-right">
+                      <p className="text-xs text-white/45">Lowest price</p>
+                      <p className="text-sm font-semibold text-white">
+                        {cheapest ? formatMoney(cheapest.price) : "--"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Offers list */}
+                <div className="mt-4 px-4 pb-2 space-y-2">
+                  {sortedOffers.map((o) => {
+                    const isCheapest =
+                      o.store === cheapest.store && o.price === cheapest.price;
+
+                    return (
+                      <div
+                        key={`${p.id}-${o.store}`}
+                        className="flex items-center justify-between rounded-xl border border-white/10 bg-[#050815]/30 px-3 py-2"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold text-white/85">
+                            {o.store}
+                          </span>
+
+                          {isCheapest && (
+                            <span className="rounded-full bg-emerald-500/15 border border-emerald-500/25 px-2 py-0.5 text-[10px] font-semibold text-emerald-200">
+                              Cheapest
+                            </span>
+                          )}
+                        </div>
+
+                        <span className="text-sm font-semibold text-white">
+                          {formatMoney(o.price)}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Main CTA */}
+                <div className="px-4 pb-4 pt-2">
+                  <button
+                    type="button"
+                    onClick={onVisitStore}
+                    className="w-full rounded-xl py-2.5 text-sm font-semibold text-white
+                               bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500
+                               transition shadow-lg shadow-blue-500/15"
+                  >
+                    Visit Store →
+                  </button>
+
+                  <p className="mt-2 text-center text-[11px] text-white/40">
+                    Prices can change on the seller&apos;s website.
+                  </p>
+                </div>
               </div>
             );
           })}
         </div>
-
-        {/* Main CTA */}
-        <div className="px-4 pb-4 pt-2">
-          <button
-            type="button"
-            onClick={onVisitStore}
-            className="w-full rounded-xl py-2.5 text-sm font-semibold text-white
-                       bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500
-                       transition shadow-lg shadow-blue-500/15"
-          >
-            Visit Store →
-          </button>
-
-          <p className="mt-2 text-center text-[11px] text-white/40">
-            Prices can change on the seller&apos;s website.
-          </p>
-        </div>
-      </div>
-    );
-  })}
-</div>
-
 
         {items.length === 0 && <p className="mt-10 text-white/60">No items found.</p>}
       </div>
