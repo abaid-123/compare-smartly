@@ -27,7 +27,7 @@ function bestOffer(offers: Offer[]) {
 }
 
 function bestDealScore(offers: Offer[]) {
-  // Phase-1 simple score: high rating + low price
+  
   const lowest = bestOffer(offers);
   const bestRating = Math.max(...offers.map((o) => o.rating));
   return bestRating * 10 - lowest.price / 50;
@@ -1296,7 +1296,6 @@ const PRODUCTS: Product[] = [
     ],
   },
 ];
-
 
 
 export default function CategoryPage() {

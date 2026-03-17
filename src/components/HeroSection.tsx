@@ -1,6 +1,7 @@
+
 import { Link, useNavigate } from "react-router-dom";
 import { HiArrowRight } from "react-icons/hi";
-import { FiSearch } from "react-icons/fi";
+import { FiSearch, FiMic } from "react-icons/fi";
 import { useState } from "react";
 
 export default function HeroSection() {
@@ -10,6 +11,25 @@ export default function HeroSection() {
   function goCompare() {
     const query = q.trim();
     navigate(query ? `/compare?q=${encodeURIComponent(query)}` : "/compare");
+  }
+
+  function startVoiceSearch() {
+    const SpeechRecognition =
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      alert("Voice search not supported in this browser");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = "en-US";
+    recognition.start();
+
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      setQ(transcript);
+    };
   }
 
   return (
@@ -22,6 +42,7 @@ export default function HeroSection() {
 
       <div className="relative mx-auto max-w-7xl px-4 pt-16 pb-12 md:pt-24 md:pb-20">
         <div className="mx-auto max-w-4xl text-center">
+          
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-white">
             Compare Prices{" "}
             <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
@@ -37,19 +58,34 @@ export default function HeroSection() {
             powered recommendations.
           </p>
 
-          {/* Search bar (new) */}
+          {/* SEARCH BAR */}
           <div className="mx-auto mt-7 max-w-2xl">
             <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 backdrop-blur px-3 py-3 shadow-lg shadow-blue-500/10">
+              
+              {/* search icon */}
               <FiSearch className="h-5 w-5 text-white/50" />
+
+              {/* input */}
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") goCompare();
                 }}
-                placeholder="Search a product to compare prices (e.g., iPhone 15 Pro, AirPods Pro)"
+                placeholder="Search a product (e.g., iPhone 15 Pro, AirPods Pro)"
                 className="w-full bg-transparent text-sm md:text-base text-white placeholder:text-white/35 outline-none"
               />
+
+              {/* voice search */}
+              <button
+                onClick={startVoiceSearch}
+                className="p-2 rounded-lg hover:bg-white/10 transition"
+                title="Voice search"
+              >
+                <FiMic className="h-5 w-5 text-white/70" />
+              </button>
+
+              {/* search button */}
               <button
                 type="button"
                 onClick={goCompare}
@@ -61,7 +97,7 @@ export default function HeroSection() {
               </button>
             </div>
 
-            {/* small link instead of big second button */}
+            {/* small link */}
             <div className="mt-3">
               <Link
                 to="/how-it-works"
@@ -71,9 +107,6 @@ export default function HeroSection() {
               </Link>
             </div>
           </div>
-
-          {/* Optional: keep a single CTA row (if you still want) */}
-          {/* If you want the old button too, we can add it back, but this is cleaner. */}
         </div>
 
         <div className="mt-12 h-px w-full bg-white/10" />
@@ -81,3 +114,4 @@ export default function HeroSection() {
     </section>
   );
 }
+
