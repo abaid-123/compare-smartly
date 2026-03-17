@@ -10,7 +10,7 @@ import AllCategories from "./components/AllCategories";
 import SignInModal from "./components/SignInModal";
 import SignUpModal from "./components/SignUpModal";
 import CategoryPage from "./pages/CategoryPage";
-import CameraCapture from "./components/CameraCapture";
+// import CameraCapture from "./components/CameraCapture";
 
 export default function App() {
   const [signInOpen, setSignInOpen] = useState(false);
@@ -27,7 +27,7 @@ export default function App() {
         <Route path="/features" element={<Featured />} />
         <Route path="/categories" element={<AllCategories />} />
         <Route path="/categories/:category" element={<CategoryPage />} />
-<Route path="/camera-search" element={<CameraCapture />} />
+{/* <Route path="/camera-search" element={<CameraCapture />} /> */}
       </Routes>
       <Footer />
 
