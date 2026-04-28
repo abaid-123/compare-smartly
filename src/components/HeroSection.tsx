@@ -115,11 +115,17 @@ export default function HeroSection() {
               <button
                 type="button"
                 onClick={goCompare}
-                className="inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-xs md:text-sm font-semibold text-white
-                           bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500
-                           transition shadow-lg shadow-blue-500/15 whitespace-nowrap"
+                className="inline-flex items-center justify-center gap-2 rounded-xl
+             px-3 py-2 md:px-4 md:py-2
+             text-xs md:text-sm font-semibold text-white
+             bg-gradient-to-r from-blue-500 to-indigo-600
+             hover:from-blue-400 hover:to-indigo-500
+             transition shadow-lg shadow-blue-500/15
+             whitespace-nowrap"
               >
-                Search & Compare <HiArrowRight className="w-4 h-4" />
+                <span className="hidden sm:inline">Search & Compare</span>
+                <span className="sm:hidden">Search</span>
+                <HiArrowRight className="w-4 h-4" />
               </button>
             </div>
 
