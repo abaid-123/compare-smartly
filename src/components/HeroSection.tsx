@@ -1,12 +1,13 @@
-
 import { Link, useNavigate } from "react-router-dom";
 import { HiArrowRight } from "react-icons/hi";
-import { FiSearch, FiMic } from "react-icons/fi";
-import { useState } from "react";
+import { FiSearch, FiMic, FiCamera } from "react-icons/fi";
+import { useRef, useState } from "react";
 
 export default function HeroSection() {
   const [q, setQ] = useState("");
   const navigate = useNavigate();
+
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   function goCompare() {
     const query = q.trim();
@@ -15,7 +16,8 @@ export default function HeroSection() {
 
   function startVoiceSearch() {
     const SpeechRecognition =
-      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
       alert("Voice search not supported in this browser");
@@ -32,6 +34,16 @@ export default function HeroSection() {
     };
   }
 
+  function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // You can send this file to backend or AI model later
+    console.log("Selected image:", file);
+
+    // Example: preview or processing logic
+  }
+
   return (
     <section className="relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-[#070A1A] via-[#060818] to-[#050815]" />
@@ -42,7 +54,6 @@ export default function HeroSection() {
 
       <div className="relative mx-auto max-w-7xl px-4 pt-16 pb-12 md:pt-24 md:pb-20">
         <div className="mx-auto max-w-4xl text-center">
-          
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-white">
             Compare Prices{" "}
             <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
@@ -61,7 +72,6 @@ export default function HeroSection() {
           {/* SEARCH BAR */}
           <div className="mx-auto mt-7 max-w-2xl">
             <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 backdrop-blur px-3 py-3 shadow-lg shadow-blue-500/10">
-              
               {/* search icon */}
               <FiSearch className="h-5 w-5 text-white/50" />
 
@@ -75,7 +85,23 @@ export default function HeroSection() {
                 placeholder="Search a product (e.g., iPhone 15 Pro, AirPods Pro)"
                 className="w-full bg-transparent text-sm md:text-base text-white placeholder:text-white/35 outline-none"
               />
+              {/* camera upload */}
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="p-2 rounded-lg hover:bg-white/10 transition"
+                title="Upload image"
+              >
+                <FiCamera className="h-5 w-5 text-white/70" />
+              </button>
 
+              {/* hidden file input */}
+              <input
+                type="file"
+                accept="image/*"
+                ref={fileInputRef}
+                onChange={handleImageUpload}
+                className="hidden"
+              />
               {/* voice search */}
               <button
                 onClick={startVoiceSearch}
@@ -114,4 +140,3 @@ export default function HeroSection() {
     </section>
   );
 }
-
