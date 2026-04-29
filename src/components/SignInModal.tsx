@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 type Props = {
   open: boolean;
@@ -16,6 +16,9 @@ export default function SignInModal({ open, onClose, onOpenSignUp }: Props) {
     return () => document.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
   useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
@@ -26,6 +29,37 @@ export default function SignInModal({ open, onClose, onOpenSignUp }: Props) {
   }, [open]);
 
   if (!open) return null;
+
+  const handleLogin = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
+
+      const data = await response.json();
+      alert(data.message);
+
+      if (response.ok) {
+        localStorage.setItem("user", JSON.stringify(data.user));
+        resetForm();
+        onClose();
+      }
+    } catch (error) {
+      alert("Login failed");
+    }
+  };
+
+  const resetForm = () => {
+    setEmail("");
+    setPassword("");
+  };
 
   return (
     <div className="fixed inset-0 z-[999]">
@@ -59,6 +93,8 @@ export default function SignInModal({ open, onClose, onOpenSignUp }: Props) {
             <div>
               <label className="block text-xs text-white/60 mb-2">Email</label>
               <input
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 type="email"
                 placeholder="you@example.com"
                 className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/80 placeholder:text-white/35 outline-none focus:border-white/20"
@@ -70,6 +106,8 @@ export default function SignInModal({ open, onClose, onOpenSignUp }: Props) {
                 Password
               </label>
               <input
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 type="password"
                 placeholder="••••••••"
                 className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/80 placeholder:text-white/35 outline-none focus:border-white/20"
@@ -78,6 +116,7 @@ export default function SignInModal({ open, onClose, onOpenSignUp }: Props) {
 
             <button
               type="button"
+              onClick={handleLogin}
               className="w-full rounded-lg py-3 text-sm font-semibold text-white
                          bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500
                          transition shadow-lg shadow-blue-500/15"

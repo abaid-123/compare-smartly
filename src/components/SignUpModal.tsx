@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 type Props = {
   open: boolean;
@@ -16,6 +16,9 @@ export default function SignUpModal({ open, onClose, onOpenSignIn }: Props) {
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [open, onClose]);
+  const [full_name, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   // Lock scroll
   useEffect(() => {
@@ -28,6 +31,38 @@ export default function SignUpModal({ open, onClose, onOpenSignIn }: Props) {
   }, [open]);
 
   if (!open) return null;
+
+  const handleSignup = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/api/auth/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          full_name,
+          email,
+          password,
+        }),
+      });
+
+      const data = await response.json();
+      alert(data.message);
+
+      if (response.ok) {
+        resetForm();
+        onClose();
+        onOpenSignIn();
+      }
+    } catch (error) {
+      alert("Signup failed");
+    }
+  };
+  const resetForm = () => {
+  setFullName("");
+  setEmail("");
+  setPassword("");
+};
 
   return (
     <div className="fixed inset-0 z-[999]">
@@ -71,6 +106,8 @@ export default function SignUpModal({ open, onClose, onOpenSignIn }: Props) {
               <input
                 type="text"
                 placeholder="John Doe"
+                value={full_name}
+                onChange={(e) => setFullName(e.target.value)}
                 className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/80 placeholder:text-white/35 outline-none focus:border-white/20"
               />
             </div>
@@ -80,6 +117,8 @@ export default function SignUpModal({ open, onClose, onOpenSignIn }: Props) {
               <input
                 type="email"
                 placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/80 placeholder:text-white/35 outline-none focus:border-white/20"
               />
             </div>
@@ -91,15 +130,18 @@ export default function SignUpModal({ open, onClose, onOpenSignIn }: Props) {
               <input
                 type="password"
                 placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/80 placeholder:text-white/35 outline-none focus:border-white/20"
               />
             </div>
 
             <button
               type="button"
+              onClick={handleSignup}
               className="w-full rounded-lg py-3 text-sm font-semibold text-white
-                         bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500
-                         transition shadow-lg shadow-blue-500/15"
+             bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500
+             transition shadow-lg shadow-blue-500/15"
             >
               Create Account
             </button>
